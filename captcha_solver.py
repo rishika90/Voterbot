@@ -1,7 +1,7 @@
 import sys
 from twocaptcha import TwoCaptcha
 
-api_key = "ff370b56e183d023852cf46b1fae9c87"
+api_key = ""
 
 def solve_captcha(image_path):
     solver = TwoCaptcha(api_key)
