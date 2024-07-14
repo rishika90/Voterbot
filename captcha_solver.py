@@ -1,7 +1,11 @@
 import sys
 from twocaptcha import TwoCaptcha
+import os
+from dotenv import load_dotenv
 
-api_key = ""
+load_dotenv()
+
+api_key = os.getenv("API_KEY")
 
 def solve_captcha(image_path):
     solver = TwoCaptcha(api_key)
