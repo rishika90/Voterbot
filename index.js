@@ -4,7 +4,6 @@ import { writeFile } from 'fs/promises';
 import { spawn } from 'child_process';
 import path from 'path';
 
-
 const app = express();
 const PORT = 3000;
 
@@ -12,12 +11,12 @@ app.use(express.json());
 
 app.post('/data', async (req, res) => {
     try {
-        const epicNumber =  req.body.epicNumber;
+        const epicNumber = req.body.epicNumber;
 
         const captchaResponse = await axios({
             method: 'get',
             url: 'https://gateway-voters.eci.gov.in/api/v1/captcha-service/generateCaptcha',
-            captchaResponseType: 'json'
+            responseType: 'json'
         });
 
         const { captcha } = captchaResponse.data;
@@ -60,7 +59,10 @@ app.post('/data', async (req, res) => {
             responseType: 'json'
         });
 
-        res.json(response2.data);
+        const pollingLocation = extractPollingLocation(response2.data);
+        const googleMapsLink = generateGoogleMapsLink(pollingLocation);
+
+        res.json({ pollingLocation, googleMapsLink });
         console.log("Success");
     } catch (error) {
         console.error('Error fetching or solving captcha:', error);
@@ -74,9 +76,9 @@ app.post('/data', async (req, res) => {
 async function solveCaptcha(imagePath) {
     return new Promise((resolve, reject) => {
         const pythonProcess = spawn('python', ['captcha_solver.py', imagePath]);
-        
+
         let solution = '';
-        
+
         pythonProcess.stdout.on('data', (data) => {
             solution += data.toString();
         });
@@ -94,6 +96,20 @@ async function solveCaptcha(imagePath) {
         });
     });
 }
+
+function extractPollingLocation(data) {
+    const result = data[0]; 
+    const pollingStation = result.content.psbuildingName;
+    const pollingAddress = result.content.buildingAddress;
+    return `${pollingStation}, ${pollingAddress}`;
+    
+}
+
+function generateGoogleMapsLink(location) {
+    const encodedLocation = encodeURIComponent(location);
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodedLocation}`;
+}
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
