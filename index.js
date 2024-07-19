@@ -101,7 +101,9 @@ function extractPollingLocation(data) {
     const result = data[0]; 
     const pollingStation = result.content.psbuildingName;
     const pollingAddress = result.content.buildingAddress;
-    return `${pollingStation}, ${pollingAddress}`;
+    const pollingAssembly = result.content.asmblyName;
+    const pollingParliament = result.content.prlmntName;
+    return `${pollingStation}, ${pollingAddress}, ${pollingParliament}, ${pollingAssembly}`;
     
 }
 
